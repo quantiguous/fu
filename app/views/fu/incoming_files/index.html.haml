@@ -1,0 +1,85 @@
+%br
+- unless @sc_service.nil?
+  = link_to 'New File Upload', new_incoming_file_path(:sc_service => params[:sc_service]) unless @sc_service.has_auto_upload?
+
+%br
+%br
+%h1 Uploaded Files
+%h2.collapsible
+  Advanced Search
+  %span.caret
+.collapsible-content
+  = render :partial => 'advanced_search'
+%br
+= "Total Count: #{@files_count}"
+%br
+= will_paginate @incoming_files
+%br
+%table.table.table-bordered.table-striped.table-hover
+  .thead
+    %th{:style=>'text-align:left; background-color: lightblue;'}
+    %th{:style=>'text-align:left; background-color: lightblue;'}
+    %th{:style=>'text-align:left; background-color: lightblue;'}
+      Service Name
+    %th{:style=>'text-align:left; background-color: lightblue;'}
+      File Type
+    %th{:style=>'text-align:left; background-color: lightblue;'}
+      File Name
+    %th{:style=>'text-align:left; background-color: lightblue;'}
+      File Size
+    %th{:style=>'text-align:left; background-color: lightblue;'}
+      Line Count
+    - if params[:sc_service] != 'ECOL'
+      %th{:style=>'text-align:left; background-color: lightblue;'}
+        Record Count
+      %th{:style=>'text-align:left; background-color: lightblue;'}
+        Pending Approval
+    %th{:style=>'text-align:left; background-color: lightblue;'}
+      Status
+    %th{:style=>'text-align:left; background-color: lightblue;'}
+      Upload Started At
+    %th{:style=>'text-align:left; background-color: lightblue;'}
+      Upload Time
+    %th{:style=>'text-align:left; background-color: lightblue;'}
+      Fault Text
+  .tbody
+    - @incoming_files.each do |incoming_file|
+      %tr
+        %td{:style=>'text-align:left;'}
+          = link_to 'Show Summary', :controller => "incoming_files", :action => "show", :id => incoming_file.id
+        %td{:style=>'text-align:left;'}
+          - if incoming_file.approval_status == "U"
+            = link_to 'Destroy', {:controller => 'incoming_files', :action => :destroy, :id => incoming_file.id}, :data => { :confirm => 'Are you sure?' }
+        %td{:style=>'text-align:left;'}
+          = incoming_file.sc_service.try(:name) || incoming_file.service_name
+        %td{:style=>'text-align:left;'}
+          = incoming_file.incoming_file_type.try(:name) || incoming_file.file_type
+        %td{:style=>'text-align:left;'}
+          - if (incoming_file.incoming_file_type.present? && incoming_file.incoming_file_type.auto_upload == "Y")
+            = incoming_file.file_name
+          - else
+            = link_to incoming_file.file_name, {:controller => "incoming_files", :action => "view_raw_content", :id => incoming_file.id}
+        %td{:style=>'text-align:left;'}
+          = incoming_file.size_in_bytes
+        %td{:style=>'text-align:left;'}
+          = incoming_file.line_count
+        - if params[:sc_service] != 'ECOL'
+          %td{:style=>'text-align:left;'}
+            = incoming_file.record_count
+          %td{:style=>'text-align:left;font-weight: bold;'}
+            = incoming_file.pending_approval
+        %td{:style=>'text-align:left;'}
+          = incoming_file.job_status
+        %td{:style=>'text-align:left;'}
+          = incoming_file.started_at.try(:strftime, "%d/%m/%Y %I:%M%p") rescue ""
+        %td{:style=>'text-align:left;'}
+          = incoming_file.upload_time
+        %td{:style=>'text-align:left;'}
+          - if incoming_file.fault_code.nil?
+            .span{:class =>"has-tooltip", "data-toggle" => 'tooltip',"title" => "No Fault Text Available for this record", "data-placement" => 'bottom', "data-html" => true}
+              Show Fault Text
+          - else
+            = link_to "Show Fault Text", show_fault_incoming_files_path(incoming_file.id),  {:remote => true, 'data-toggle' =>  "modal", 'data-target' => '#modal-window'}
+%div{ id:"modal-window", class:"modal hide fade", role: "dialog", 'aria-labelledby' => "myModalLabel", 'aria-hidden' => "true"}
+
+

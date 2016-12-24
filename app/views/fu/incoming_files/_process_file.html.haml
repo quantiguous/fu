@@ -1,0 +1,3 @@
+- can = !(can? :process_file, IncomingFile)
+= simple_form_for :ic_incoming_record, :url => process_file_incoming_file_path(@incoming_file), :html => { :method => :get, :id => 'process_file', :style=> 'overflow:  auto;display:inline-block;'} do |f| 
+  = button_tag "Process", :id => 'submit_process_file', :role => "button", :class => "btn btn-primary", :disabled => can

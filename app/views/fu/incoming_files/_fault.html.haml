@@ -1,0 +1,17 @@
+.modal-header
+  %button.close{"aria-hidden" => "true", "data-dismiss" => "modal", :type => "button"} ×
+  .modal-body
+    %table.table.datatable
+      %thead
+        %tr
+          %th Fault Code
+          %th Fault Subcode
+          %th Fault Reason
+      %tbody
+        %tr
+          %td
+            = fault.fault_code
+          %td
+            = fault.fault_subcode
+          %td
+            = fault.fault_reason

@@ -1,0 +1,12 @@
+%br
+%br
+
+File :
+= @result.nil? ? "Not Available" : @result[:filename]
+
+%br
+%br
+
+Content :
+%div#raw_file_content
+  = @result.nil? ? "Not Available" : raw_file_content(@result[:content])

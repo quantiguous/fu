@@ -1,0 +1,18 @@
+= form_tag '', :method => 'get', :class => 'form-horizontal', :autocomplete=>"off" do
+  .control-group
+    = label_tag "File Type", "File Type", :class => 'control-label'
+    - if @sc_service.nil?
+      = select_tag :file_type, options_for_select([]),:prompt => 'All'
+    - else
+      = select_tag :file_type, options_for_select(@sc_service.incoming_file_types.all.map {|u| [u.name, u.code]},params[:file_type]),:prompt => 'All'
+  .control-group
+    = label_tag "File Name", "File Name", :class => 'control-label'
+    = text_field_tag :file_name, params[:file_name]
+  = hidden_field_tag :advanced_search, :true
+  = hidden_field_tag :sc_service, params[:sc_service]
+  .form-actions
+    = submit_tag "Search", :name => nil, :class => 'btn btn-primary', :id => "adv_search_button"
+    = button_tag "Reset", :type => 'button', :value=>'Reset', :class => 'btn reset-btn'
+
+:javascript
+  var in_advanced_search = true;

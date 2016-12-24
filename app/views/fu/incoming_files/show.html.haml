@@ -1,0 +1,4 @@
+- if @incoming_file.service_name == 'ECOL'
+  = render :partial => "show_ecol"
+- else
+  = render :partial => "show_summary"

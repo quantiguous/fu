@@ -1,0 +1,63 @@
+%br
+%br
+%h1 File Summary
+%br
+
+%h1 
+  = @incoming_file.file_name
+%br
+%table.table.table-bordered.table-striped.table-hover.align_center
+  %tbody
+    %tr
+      %td{:style=>'text-align:left;'}
+        = "Response File Name"
+      %td{:style=>'text-align:left;'}
+        = @incoming_file.rep_file_name
+    %tr
+      %td{:style=>'text-align:left;'}
+        = "Response File Path"
+      %td{:style=>'text-align:left;'}
+        = @incoming_file.rep_file_path
+    %tr
+      %td{:style=>'text-align:left;'}
+        = "Response File Status"    
+      %td{:style=>'text-align:left;'}
+        = @incoming_file.status_text(@incoming_file.rep_file_status)
+    - unless ENV['CONFIG_URL_IIB_FILE_MGR'].nil? or ENV['CONFIG_URL_IIB_FILE_MGR'].empty?
+      %tr
+        %td{:style=>'text-align:left;'}
+          = link_to 'Download', download_file_incoming_file_path(@incoming_file, :download => true)
+        %td{:style=>'text-align:left;'}
+      %tr
+        %td{:style=>'text-align:left;'}
+          = link_to 'View', download_file_incoming_file_path(@incoming_file, :view => true)
+        %td{:style=>'text-align:left;'}
+
+%br
+%p{:style => 'text-align:left; padding-left:6px; padding-bottom:17px'}
+  = render 'ecol_customers/approve', :@record => @incoming_file
+%table.table.table-bordered.table-striped.table-hover.align_center
+  %thead
+    %tr
+      %th{:style=>'text-align:left;'}
+      %th{:style=>'text-align:left;'}
+        Total Records
+      %th{:style=>'text-align:left;'}
+        Skipped
+      %th{:style=>'text-align:left;'}
+        Success
+      %th{:style=>'text-align:left;'}
+        Failed
+  %tbody
+    %tr
+      - if @incoming_file.service_name == 'ECOL'
+        %td{:style=>'text-align:left;'}
+          = "Remitter"    
+        %td{:style=>'text-align:left;'}
+          = @incoming_file.ecol_remitters.count(:id) + @incoming_file.failed_records.count(:id)
+        %td{:style=>'text-align:left;'}
+          = link_to @skipped_count, incoming_file_records_path(:incoming_file_id => @incoming_file.id, :status => 'SKIPPED')
+        %td{:style=>'text-align:left;'}
+          = link_to @incoming_file.ecol_remitters.count(:id), ecol_remitters_path(:incoming_file_id => @incoming_file.id)
+        %td{:style=>'text-align:left;'}
+          = link_to @incoming_file.failed_records.count(:id), incoming_file_records_path(:incoming_file_id => @incoming_file.id, :status => 'FAILED')

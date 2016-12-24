@@ -1,0 +1,276 @@
+%br
+%br
+%h1 File Summary
+%br
+%br
+%table.table.table-bordered.table-striped.table-hover.align_center{:style=>'width:45%;float: left; margin-right: 2%;'}
+  %thead
+    %tr 
+      %th{:style=>'text-align:left;'}
+        = @incoming_file.file_name
+      %th
+  %tbody
+    %tr
+      %td{:style=>'text-align:left;'}
+        = "Service Name"
+      %td{:style=>'text-align:left;'}
+        = @incoming_file.service_name
+    %tr
+      %td{:style=>'text-align:left;'}
+        = "File Type"
+      %td{:style=>'text-align:left;'}
+        = @incoming_file.file_type
+    %tr
+      %td{:style=>'text-align:left;'}
+        = "Upload Started At"
+      %td{:style=>'text-align:left;'}
+        = @incoming_file.started_at.try(:strftime, "%d/%m/%Y %I:%M%p") rescue ""
+    %tr
+      %td{:style=>'text-align:left;'}
+        = "Upload Time"
+      %td{:style=>'text-align:left;'}
+        = @incoming_file.upload_time
+    %tr
+      %td{:style=>'text-align:left;'}
+        = "File Path"
+      %td{:style=>'text-align:left;'}
+        = @incoming_file.file_path
+    %tr
+      %td{:style=>'text-align:left;'}
+        = "File Size"
+      %td{:style=>'text-align:left;'}
+        = @incoming_file.size_in_bytes
+    %tr
+      %td{:style=>'text-align:left;'}
+        = "Line Count"
+      %td{:style=>'text-align:left;'}
+        = @incoming_file.line_count
+    %tr
+      %td{:style=>'text-align:left;'}
+        = "Pending Approval"
+      %td{:style=>'text-align:left;font-weight: bold;'}
+        = @incoming_file.pending_approval
+        &nbsp;&nbsp;
+        - if @incoming_file.pending_approval == 'Y'
+          - if @incoming_file.last_process_step.nil?
+            = render :partial => "process_file"
+            = render :partial => "reject"
+          - elsif @incoming_file.last_process_step == 'B'
+            = render :partial => "process_file"
+          - elsif @incoming_file.last_process_step == 'R'
+            = render :partial => "process_file"
+%table.table.table-bordered.table-striped.table-hover.align_center{:style=>'width:45%;float: right;'}
+  %thead
+    %tr 
+      %th{:style=>'text-align:left;'}
+        = "Status"
+      %th
+  %tbody
+    %tr
+      %td{:style=>'text-align:left;'}
+        = "Status"
+      %td{:style=>'text-align:left;'}
+        = @incoming_file.job_status
+        - if @incoming_file.status == 'F'
+          = " | "
+          = link_to "Show Fault Text", "#", :class => 'active-link', :href => "#faultText", data: { fault_reason: @incoming_file.fault_reason, fault_code: @incoming_file.fault_code, fault_subcode: @incoming_file.fault_subcode}
+    %tr
+      %td{:style=>'text-align:left;'}
+        = "Last Process Step"
+      %td{:style=>'text-align:left;'}
+        = @incoming_file.last_process_step
+        - if @incoming_file.pending_approval == 'Y' and (@incoming_file.last_process_step.nil? or @incoming_file.last_process_step == 'R')
+          = link_to "Show Fault Text", "#", :class => 'active-link', :href => "#faultText", data: { fault_reason: @incoming_file.fault_reason, fault_code: @incoming_file.fault_code, fault_subcode: @incoming_file.fault_subcode}
+    %tr
+      %td{:style=>'text-align:left;'}
+        = "Broker UUID"
+      %td{:style=>'text-align:left;'}
+        = @incoming_file.broker_uuid
+    %tr
+      %td{:style=>'text-align:left;'}
+        = "Alert Count"
+      %td{:style=>'text-align:left;'}
+        = @incoming_file.alert_count
+    %tr
+      %td{:style=>'text-align:left;'}
+        = "Last Alert At"
+      %td{:style=>'text-align:left;'}
+        = @incoming_file.last_alert_at.try(:strftime, "%d/%m/%Y %I:%M%p") rescue ""
+    %tr
+      %td{:style=>'text-align:left;'}
+        = "Audit Steps"
+      %td{:style=>'text-align:left;'}
+        = link_to 'Show', {:controller => 'incoming_files', :action => 'audit_steps', :id => @incoming_file.id, :step_name => 'ALL'}
+      - if !@incoming_file.incoming_file_type.records_table.nil? and has_route?({:controller => @incoming_file.incoming_file_type.records_table, :action => 'incoming_file_summary'})
+        %tr
+          %td{:style=>'text-align:left;'}
+            = 'Other Details'
+          %td{:style=>'text-align:left;'}
+            = link_to 'Show', {:controller => @incoming_file.incoming_file_type.records_table, :action => 'incoming_file_summary', :file_name => @incoming_file.file_name}
+
+%table.table.table-bordered.table-striped.table-hover.align_center
+  %thead
+    %tr 
+      %th{:style=>'text-align:left;'}
+        = "Response"
+      %th
+  %tbody
+    
+    %tr
+      %td{:style=>'text-align:left;'}
+        = "Response File Name"
+      %td{:style=>'text-align:left;'}
+        = @incoming_file.rep_file_name 
+        &nbsp;
+        - if !@incoming_file.auto_upload? and (!ENV['CONFIG_SCP_IIB_FILE_MGR'].nil? or !ENV['CONFIG_SCP_IIB_FILE_MGR'].empty?) and @incoming_file.status == 'C' and !@incoming_file.rep_file_status.nil?
+          = "("
+          = link_to 'Download', download_file_incoming_file_path(@incoming_file, :file_path => @incoming_file.rep_file_path, :file_name => @incoming_file.rep_file_name, :download => true)
+          = "/"
+          = link_to 'View', download_file_incoming_file_path(@incoming_file, :file_path => @incoming_file.rep_file_path, :file_name => @incoming_file.rep_file_name, :view => true)
+          = ")"
+    %tr
+      %td{:style=>'text-align:left;'}
+        = "Response File Path"
+      %td{:style=>'text-align:left;'}
+        = @incoming_file.rep_file_path
+    %tr
+      %td{:style=>'text-align:left;'}
+        = "Response File Status"    
+      %td{:style=>'text-align:left;'}
+        = @incoming_file.status_text(@incoming_file.rep_file_status)
+        &nbsp;
+        - if @incoming_file.status == 'C'
+          - can = !(can? :generate_response_file, IncomingFile)
+          = simple_form_for :incoming_file, :url => generate_response_file_incoming_file_path(@incoming_file), :html => { :method => :get, :id => 'generate_records', :style=> 'overflow:  auto;display:inline-block;'} do |f| 
+            = button_tag "Generate Response File", :id => 'submit_generate', :role => "button", :class => "btn btn-primary", :disabled => can
+
+    
+    - if @incoming_file.incoming_file_type.build_nack_file == 'Y'
+      %tr
+        %td{:style=>'text-align:left;'}
+          = "Nack File Name"
+        %td{:style=>'text-align:left;'}
+          = @incoming_file.nack_file_name
+          &nbsp;
+          - if (!ENV['CONFIG_SCP_IIB_FILE_MGR'].nil? or !ENV['CONFIG_SCP_IIB_FILE_MGR'].empty?) and @incoming_file.status == 'F' and !(@incoming_file.nack_file_status.nil?)
+            = "("
+            = link_to 'Download', download_file_incoming_file_path(@incoming_file, :file_path => @incoming_file.nack_file_path, :file_name => @incoming_file.nack_file_name, :download => true)
+            = "/"
+            = link_to 'View', download_file_incoming_file_path(@incoming_file, :file_path => @incoming_file.nack_file_path, :file_name => @incoming_file.nack_file_name, :view => true)
+            = ")"
+      %tr
+        %td{:style=>'text-align:left;'}
+          = "Nack File Path"
+        %td{:style=>'text-align:left;'}
+          = @incoming_file.nack_file_path
+      %tr
+        %td{:style=>'text-align:left;'}
+          = "Nack File Status"    
+        %td{:style=>'text-align:left;'}
+          = @incoming_file.status_text(@incoming_file.nack_file_status)
+
+%br
+%br
+- unless @incoming_file.auto_upload?
+  %p{:style => 'text-align:left; padding-left:6px; padding-bottom:17px'}
+    = render 'ecol_customers/approve', :@record => @incoming_file
+
+%table.table.table-bordered.table-striped.table-hover.align_center
+  %thead
+    %tr
+      %th{:style=>'text-align:left;'}
+      %th{:style=>'text-align:center; border-left: 3px solid #ffffff;'}
+        Total Records
+      %th{:style=>'text-align:center;'}
+        Completed
+      %th{:style=>'text-align:center;'}
+        UnParsed
+      %th{:style=>'text-align:center; border-right: 3px solid #ffffff;'}
+        Failed
+      %th{:style=>'text-align:center;'}
+        Timed Out
+      %th{:style=>'text-align:center; border-left: 3px solid #ffffff;'}
+        Skipped
+      %th{:style=>'text-align:center;'}
+        Overriden
+      %th{:style=>'text-align:center; border-right: 3px solid #ffffff;'}
+        Retry
+  %tbody
+    %tr
+      / - if @incoming_file.service_name == 'ECOL'
+      /   %td{:style=>'text-align:left;'}
+      /     = "Remitter"    
+      /   %td{:style=>'text-align:left;'}
+      /     = @incoming_file.record_count || 0
+      /   %td{:style=>'text-align:left;'}
+      /     = link_to @incoming_file.bad_record_count || 0, incoming_file_records_path(:incoming_file_id => @incoming_file.id, :status => 'BAD')
+      /   %td{:style=>'text-align:left;'}
+      /     = link_to @incoming_file.timedout_record_count || 0, incoming_file_records_path(:incoming_file_id => @incoming_file.id, :status => 'TIMED OUT')
+      /   %td{:style=>'text-align:left;'}
+      /     = link_to @incoming_file.skipped_record_count || 0, incoming_file_records_path(:incoming_file_id => @incoming_file.id, :status => 'SKIPPED')
+      /   %td{:style=>'text-align:left;'}
+      /     = link_to @incoming_file.completed_record_count || 0, ecol_remitters_path(:incoming_file_id => @incoming_file.id)
+      /   %td{:style=>'text-align:left;'}
+      /     = link_to @incoming_file.failed_record_count || 0, incoming_file_records_path(:incoming_file_id => @incoming_file.id, :status => 'FAILED')
+      /   %td{:style=>'text-align:left;'}
+      /     = '-'
+
+      - if @incoming_file.service_name == 'IMTSERVICE'
+        %td{:style=>'text-align:left;'}
+          = "IMT Transaction"
+        %td{:style=>'text-align:left;'}
+          = @incoming_file.record_count || 0
+        %td{:style=>'text-align:left;'}
+          = link_to @incoming_file.bad_record_count || 0, incoming_file_records_path(:incoming_file_id => @incoming_file.id, :status => 'BAD')
+        %td{:style=>'text-align:left;'}
+          = link_to @incoming_file.timedout_record_count || 0, incoming_file_records_path(:incoming_file_id => @incoming_file.id, :status => 'TIMED OUT')
+        %td{:style=>'text-align:left;'}
+          = link_to @incoming_file.skipped_record_count || 0, incoming_file_records_path(:incoming_file_id => @incoming_file.id, :status => 'SKIPPED')
+        %td{:style=>'text-align:left;'}
+          = link_to @incoming_file.completed_record_count || 0, incoming_file_records_path(:incoming_file_id => @incoming_file.id, :status => 'COMPLETED')
+        %td{:style=>'text-align:left;'}
+          = link_to @incoming_file.failed_record_count || 0, incoming_file_records_path(:incoming_file_id => @incoming_file.id, :status => 'FAILED')
+        %td{:style=>'text-align:left;'}
+          = '-'
+
+      - elsif !@incoming_file.incoming_file_type.records_table.empty?
+        - table = @incoming_file.incoming_file_type.records_table
+        - if has_route?({:controller => @incoming_file.incoming_file_type.records_table, :action => 'show'})
+          %td{:style=>'text-align:left;'}
+            = @incoming_file.file_type
+          %td{:style=>'text-align:center; border-left: 3px solid #ffffff;'}
+            = @incoming_file.record_count || 0
+          %td{:style=>'text-align:center;'}
+            = link_to @incoming_file.completed_record_count || 0, public_send("#{table}_path",:file_name => @incoming_file.file_name, :status => 'COMPLETED')
+          %td{:style=>'text-align:center;'}
+            = link_to @incoming_file.bad_record_count || 0, incoming_file_records_path(:incoming_file_id => @incoming_file.id, :status => 'BAD')
+          %td{:style=>'text-align:center; border-right: 3px solid #ffffff;'}
+            = link_to @incoming_file.failed_record_count || 0, public_send("#{table}_path",:file_name => @incoming_file.file_name, :status => 'FAILED')
+          %td{:style=>'text-align:center;'}
+            = link_to @incoming_file.timedout_record_count || 0, public_send("#{table}_path",:file_name => @incoming_file.file_name, :status => 'TIMED OUT')
+          %td{:style=>'text-align:center; border-left: 3px solid #ffffff;'}
+            = link_to @incoming_file.skipped_record_count || 0, public_send("#{table}_path",:file_name => @incoming_file.file_name, :status => 'SKIPPED')
+          %td{:style=>'text-align:center;'}
+            = link_to @incoming_file.overriden_record_count || 0, public_send("#{table}_path",:file_name => @incoming_file.file_name, :status => 'OVERRIDEN', :overrided_flag => 'true')
+          %td{:style=>'text-align:center; border-right: 3px solid #ffffff;'}
+            = link_to @incoming_file.pending_retry_record_count || 0, public_send("#{table}_path",:file_name => @incoming_file.file_name, :status => 'PENDING RETRY')
+
+#faultText.modal.hide.fade{"aria-hidden" => "true", "aria-labelledby" => "myModalLabel", :role => "dialog", :tabindex => "-1"}
+  .modal-header
+    %button.close{"aria-hidden" => "true", "data-dismiss" => "modal", :type => "button"} ×
+    %h3 Fault Text
+    #error_message{:style => 'color:red'}
+  .modal-body{:style => "max-height:450px;"}
+    %table.table.no-border
+      %tr
+        %td.label Fault Code: 
+        %td
+          %label.fault_code{:style => 'word-wrap: break-word'}
+      %tr
+        %td.label Fault Reason:
+        %td
+          %label.fault_reason{:style => 'word-wrap: break-word'}
+      %tr
+        %td.label Fault Subcode:
+        %td
+          %label.fault_subcode{:style => 'word-wrap: break-word'}

@@ -1,0 +1,102 @@
+CREATE OR REPLACE VIEW DESK.CUSTOMER_ACCOUNTS AS
+SELECT gam.foracid "ACCOUNT_NUMBER",
+          gam.acct_name "NAME",
+          gam.cif_id "CIF_ID",
+          ce.email "EMAIL_ID",
+             cp.PHONENOCOUNTRYCODE
+          || ' '
+          || cp.PHONENOCITYCODE
+          || ' '
+          || cp.PHONENOLOCALCODE  "MOBILE_NO",
+          ac.SEGMENTATION_CLASS "SEGMENT",
+          ac.SUBSEGMENT "SUB_SEGMENT",
+          uc.loginid "RM_ID",
+          gam.sol_id "ACCOUNT_BASE_SOL",
+          sol.sol_desc "ACCOUNT_SOL_DESCRIPTION",
+          ac.strfield16 "PAN",
+          cnma.address1||' '||address2||' '||address3 "ADDRESS",
+          cnma.city_code "CITY_CODE",
+          ct.ref_desc "CITY",
+          cnma.state_code "STATE_CODE",
+          st.ref_desc "STATE",
+          cnma.cntry_code "COUNTRY_CODE",
+          cn.ref_desc "COUNTRY",
+          cnma.pin_code "PIN",
+          CASE gam.schm_type
+          WHEN 'ODA' THEN cam.acct_status
+          WHEN 'SBA' THEN smt.acct_status
+          WHEN 'CCA' THEN cam.acct_status
+          WHEN 'CAA' THEN smt.acct_status
+          ELSE 'A'
+          END "ACCT_STATUS",
+          CASE gam.schm_type
+          WHEN 'ODA' THEN decode(cam.acct_status,'A','ACTIVE','I','INACTIVE','DORMANT')
+          WHEN 'SBA' THEN decode(smt.acct_status,'A','ACTIVE','I','INACTIVE','DORMANT')
+          WHEN 'CCA' THEN decode(cam.acct_status,'A','ACTIVE','I','INACTIVE','DORMANT')
+          WHEN 'CAA' THEN decode(smt.acct_status,'A','ACTIVE','I','INACTIVE','DORMANT')
+          ELSE 'ACTIVE'
+          END "ACCOUNT_STATUS",
+          gam.frez_code,
+          decode(gam.frez_code,'D','DEBIT FREEZ','C','CREDIT FREEZ','T','TOTAL FREEZ') "FREEZ_STATUS",
+          decode(gam.acct_cls_date,NULL,'OPEN','CLOSED') "ACCT_CLOSE_FLAG",
+          gam.acct_cls_date "ACCOUNT_CLOSE_DATE",
+          gam.mode_of_oper_code "MODE_OF_OPER_CODE",
+          opr.ref_desc "MODE_OF_OPERATION",
+          cc.free_code_20 "DSB_REGISTRATION_FLAG",
+          gam.schm_code "SCHM_CODE",
+          gsp.schm_desc "SCHEME_DESCRIPTION",
+          sa.MIN_CASH_PKUP_AMT,
+		  NVL(cc.free_code_31,sa.MAX_CASH_PKUP_AMT) "MAX_CASH_PKUP_AMT",
+          sa.MIN_CASH_DEL_AMT,
+		  NVL(cc.free_code_32,sa.MAX_CASH_DEL_AMT) "MAX_CASH_DEL_AMT",
+          sa.MAX_CASH_STP_DEL_AMT,
+          sa.MIN_DD_DEL_AMT,
+    	  NVL(cc.free_code_33,sa.MAX_DD_DEL_AMT) "MAX_DD_DEL_AMT",
+          sa.MAX_DD_STP_DEL_AMT,
+          cs.PRIORITY "SEGMENT_PRIORITY",
+          sa.PRIORITY "SCHEME_PRIORITY",
+		  sg.ref_code "BUSINESS_SEG_CODE",
+		  sg.ref_desc "BUSINESS_SEG_DESC"
+     FROM tbaadm.gam,
+		  tbaadm.gac,
+          tbaadm.aas,
+          tbaadm.sol,
+          tbaadm.cam,
+          custom.cust_cfcm_main cc,
+          tbaadm.cnma,
+          (select ref_code,ref_desc from tbaadm.rct where ref_rec_type = '27') opr,
+          (select ref_code,ref_desc from tbaadm.rct where ref_rec_type = '01') ct,
+          (select ref_code,ref_desc from tbaadm.rct where ref_rec_type = '02') st,
+          (select ref_code,ref_desc from tbaadm.rct where ref_rec_type = '03') cn,
+	      (select ref_code,ref_desc from tbaadm.rct where ref_rec_type = 'CN') sg,
+          (SELECT orgkey, email FROM crmuser.phoneemail WHERE phoneoremail = 'EMAIL' AND PREFERREDFLAG = 'Y') ce,
+          (SELECT orgkey, PHONENOCOUNTRYCODE, PHONENOCITYCODE, PHONENOLOCALCODE
+             FROM crmuser.phoneemail WHERE phoneoremail = 'PHONE' AND PREFERREDFLAG = 'Y') cp,
+          crmuser.accounts ac,
+          crmuser.users uc,
+          tbaadm.gsp,
+          tbaadm.smt,
+          custom.schm_attributes sa,
+          custom.customer_segment_attributes cs
+    WHERE     gam.cif_id = ac.orgkey
+	  AND gam.acid	= gac.acid
+          AND gam.cif_id = ce.orgkey(+)
+          AND ce.orgkey = cp.orgkey(+)
+          AND uc.loginid(+) = ac.MANAGER
+          AND gam.schm_code = gsp.schm_code
+          AND gsp.schm_code = sa.schm_code(+)
+          AND gam.sol_id = sol.sol_id
+          AND gam.acid = cam.acid (+)
+          AND gam.acid = smt.acid (+)
+          AND cnma.city_code = ct.ref_code
+          AND cnma.state_code = st.ref_code
+          AND cnma.cntry_code = cn.ref_code
+	  AND gac.free_text_10 = sg.ref_code
+          AND gam.mode_of_oper_code = opr.ref_code
+          AND aas.acid = gam.acid
+          AND gam.cif_id = aas.nma_key_id
+          and gam.foracid = cc.entity_id(+)
+          and ac.orgkey = cnma.addr_b2kid(+)
+          and cnma.addr_id = aas.nma_key_type
+          and ac.segmentation_class = cs.segmentation_class(+)
+          and ac.subsegment = cs.subsegment(+);
