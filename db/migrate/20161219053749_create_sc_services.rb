@@ -1,4 +1,4 @@
-class CreateFuScServices < ActiveRecord::Migration
+class CreateScServices < ActiveRecord::Migration
   def up
     create_table :sc_services, {:sequence_start_value => '1 cache 20 order increment by 1'} do |t|
       t.string "code", :limit=>50, :null=>false, :comment => 'the code for the service'
