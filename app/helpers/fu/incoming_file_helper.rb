@@ -1,7 +1,7 @@
 module Fu
   module IncomingFileHelper
     def find_incoming_files(params)
-      incoming_files = (params[:approval_status].present? and params[:approval_status] == 'U') ? IncomingFile.unscoped : IncomingFile
+      incoming_files = IncomingFile
       incoming_files = incoming_files.where("file_type=?",params[:file_type]) if params[:file_type].present?
       incoming_files = incoming_files.where("file_name LIKE ?","#{params[:file_name]}%") if params[:file_name].present?
       incoming_files

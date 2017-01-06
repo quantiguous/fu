@@ -17,10 +17,10 @@ class CreateIncomingFiles < ActiveRecord::Migration
       t.string   :fault_code, :limit => 50, :comment => "the code that identifies the exception, if an exception occured in the ESB"
       t.string   :fault_subcode, :limit => 50, :comment => "the error code that the third party will return"
       t.string   :fault_reason, :limit => 1000, :comment => "the english reason of the exception, if an exception occurred in the ESB"
-      t.string   :approval_status, :limit => 1, :default => 'U', :null => false, :comment => "the indicator to denote whether this record is pending approval or is approved"
-      t.string   :last_action, :limit => 1, :default => 'C', :null => false, :comment => "the last action (create, update) that was performed on the record"
-      t.integer  :approved_version, :comment => "the version number of the record, at the time it was approved"
-      t.integer  :approved_id, :comment => "the id of the record that is being updated"
+      # t.string   :approval_status, :limit => 1, :default => 'U', :null => false, :comment => "the indicator to denote whether this record is pending approval or is approved"
+      # t.string   :last_action, :limit => 1, :default => 'C', :null => false, :comment => "the last action (create, update) that was performed on the record"
+      # t.integer  :approved_version, :comment => "the version number of the record, at the time it was approved"
+      # t.integer  :approved_id, :comment => "the id of the record that is being updated"
       t.integer  :lock_version, :null => false, :default => 0, :comment => "the version number of the record, every update increments this by 1"
       t.string   :broker_uuid, :limit=>255, :comment => 'the broker uuid'
       t.integer  :failed_record_count, :comment => 'the count of failed records'
@@ -46,7 +46,7 @@ class CreateIncomingFiles < ActiveRecord::Migration
       t.text     :header_record, :comment => 'the header record of the file'
     end
 
-    add_index :incoming_files, [:file_name, :approval_status], name: "in_incoming_files_1", unique: true
+    # add_index :incoming_files, [:file_name, :approval_status], name: "in_incoming_files_1", unique: true
     add_index :incoming_files, [:service_name, :status, :pending_approval], name: "in_incoming_files_2"
   end
 end

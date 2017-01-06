@@ -15,9 +15,11 @@ module Fu
       @incoming_file = Fu::IncomingFile.new(incoming_file_params)
       @sc_service = Fu::ScService.find_by_code(params[:sc_service])
       if @incoming_file.save
-        redirect_to incoming_files_path(:sc_service => params[:sc_service]), :notice => "File is successfully uploaded and is pending for approval"
+        flash[:notice] = "File is successfully uploaded"
+        redirect_to incoming_files_path(:sc_service => params[:sc_service])
       else
-        render :new, :notice => @incoming_file.errors.full_messages
+        flash[:notice] = @incoming_file.errors.full_messages
+        render :new
       end
     end
 
@@ -33,9 +35,9 @@ module Fu
       if params[:advanced_search].present?
         incoming_files = find_incoming_files(params).order("id desc")
       else
-        incoming_files = (params[:approval_status].present? and params[:approval_status] == 'U') ? IncomingFile.unscoped.where("approval_status=? and service_name=?",'U',params[:sc_service]).order("id desc") : IncomingFile.order("id desc").where(:service_name => params[:sc_service])
+        incoming_files = IncomingFile.order("id desc").where(:service_name => params[:sc_service])
       end 
-      @files_count = incoming_files.count
+      @files_count = incoming_files.count(:id)
       @incoming_files = incoming_files.paginate(:per_page => 10, :page => params[:page]) rescue []
     end
 

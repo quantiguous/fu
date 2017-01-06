@@ -20,10 +20,11 @@ Gem::Specification.new do |s|
   s.add_dependency 'haml-rails'
   s.add_dependency 'will_paginate'
   s.add_dependency 'net-scp'
-  s.add_dependency 'carrierwave'
+  s.add_dependency 'carrierwave', '0.11.2'
   s.add_dependency 'responders', '~> 2.0'
   s.add_dependency 'unscoped_associations'
   s.add_dependency 'simple_form'
+  s.add_dependency 'lazy_columns'
 
   s.add_development_dependency 'sqlite3'
   s.add_development_dependency 'rspec-rails', '3.5.0'
@@ -31,4 +32,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'shoulda-matchers'
   s.add_development_dependency 'database_cleaner'
   s.add_development_dependency 'dotenv-rails'
+  s.add_development_dependency 'jquery-rails'
 end

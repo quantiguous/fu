@@ -1,7 +1,5 @@
 module Fu
   class IncomingFile < ActiveRecord::Base  
-    include Approval
-
     lazy_load :fault_bitstream
 
     SIZE_LIMIT = 50.megabytes.to_i
@@ -22,30 +20,11 @@ module Fu
 
     belongs_to :created_user, :class_name => 'User', :foreign_key => 'created_by'
     belongs_to :updated_user, :class_name => 'User', :foreign_key => 'updated_by'
-    # has_many :ecol_remitters, :autosave => true
     belongs_to :sc_service, :foreign_key => 'service_name', :primary_key => 'code'
     belongs_to :incoming_file_type, :foreign_key => 'file_type', :primary_key => 'code'
     has_many :failed_records, -> { where status: 'FAILED' }, class_name: 'IncomingFileRecord'
     has_many :incoming_file_records
-    # belongs_to :su_incoming_file, :foreign_key => "file_name", :primary_key => "file_name"
-    # belongs_to :ic_incoming_file, :foreign_key => "file_name", :primary_key => "file_name"
-    # belongs_to :ft_incoming_file, :foreign_key => "file_name", :primary_key => "file_name"
-    # belongs_to :pc_mm_cd_incoming_file, :foreign_key => "file_name", :primary_key => "file_name"
-    # belongs_to :cn_incoming_file, :foreign_key => "file_name", :primary_key => "file_name"
     has_many :fm_audit_steps, :as => :auditable
-
-    # has_one :ecol_unapproved_record, :as => :ecol_approvable
-    # has_one :imt_unapproved_record, :as => :imt_approvable
-    # has_one :inw_unapproved_record, :as => :inw_approvable
-    # has_one :su_unapproved_record, :as => :su_approvable
-    # has_one :ic_unapproved_record, :as => :ic_approvable
-    # has_one :ft_unapproved_record, :as => :ft_approvable
-    # has_one :pc_unapproved_record, :as => :pc_approvable
-    # has_one :cn_unapproved_record, :as => :cn_approvable
-
-    # after_create :on_create_create_unapproved_record
-    # after_destroy :on_destory_remove_unapproved_records
-    # after_update :on_update_remove_unapproved_records
 
     mount_uploader :file, IncomingFileUploader
 
@@ -96,7 +75,7 @@ module Fu
     end
 
     def update_file_path
-      self.file_path = self.approval_status == 'A' ? "#{ENV['CONFIG_APPROVED_FILE_UPLOAD_PATH']}/#{self.sc_service.code.downcase}/#{self.incoming_file_type.code.downcase}" : "#{ENV['CONFIG_FILE_UPLOAD_PATH']}"
+      self.file_path = "#{ENV['CONFIG_APPROVED_FILE_UPLOAD_PATH']}/#{self.sc_service.code.downcase}/#{self.incoming_file_type.code.downcase}"
     end
 
     def job_status
@@ -115,68 +94,5 @@ module Fu
     def auto_upload?
       incoming_file_type.auto_upload == 'Y'
     end
-
-    def self.create_incoming_file
-      Dir.foreach(ENV['CONFIG_AUTO_FILE_UPLOAD_PATH']) do |fname|
-        next if fname == '.' or fname == '..' or fname == '.DS_Store'
-        if IncomingFile.create(:file => File.new(ENV['CONFIG_AUTO_FILE_UPLOAD_PATH'] + "/" + fname), :service_name => 'Ecollect', :file_type => 'Remitters', :status => 'N')
-          FileUtils.rm_f ENV['CONFIG_AUTO_FILE_UPLOAD_PATH'] + "/" + fname
-        end
-      end
-    end
-
-    def is_approved?
-      approved = self.approval_status == 'A' ? true : false
-      file_path = nil
-      if Rails.env == "production"
-        approved ?
-            file_path = Rails.root.join(ENV['CONFIG_APPROVED_FILE_UPLOAD_PATH'], self.file_name) :
-            file_path = Rails.root.join(ENV['CONFIG_FILE_UPLOAD_PATH'], self.file_name)
-      else
-        file_path = "#{Rails.root}/public#{self.file.url}"
-      end
-      result = {is_approved: approved, file_path: file_path}
-      result
-    end
-    
-
-    def on_create_create_unapproved_record
-      if approval_status == 'U'
-        EcolUnapprovedRecord.create!(:ecol_approvable => self) if self.service_name == "ECOL"
-        ImtUnapprovedRecord.create!(:imt_approvable => self) if self.service_name == "IMTSERVICE"
-        InwUnapprovedRecord.create!(:inw_approvable => self) if self.service_name == "AML"
-        SuUnapprovedRecord.create!(:su_approvable => self) if self.service_name == "SALARY"
-        IcUnapprovedRecord.create!(:ic_approvable => self) if self.service_name == "INSTANTCREDIT"
-        FtUnapprovedRecord.create!(:ft_approvable => self) if self.service_name == "FUNDSTRANSFER"
-        PcUnapprovedRecord.create!(:pc_approvable => self) if self.service_name == "PPC"
-        CnUnapprovedRecord.create!(:cn_approvable => self) if self.service_name == "CNB"
-      end
-    end
-
-    def on_destory_remove_unapproved_records
-      if approval_status == 'U'
-        ecol_unapproved_record.delete if self.service_name == "ECOL"
-        imt_unapproved_record.delete if self.service_name == "IMTSERVICE"
-        inw_unapproved_record.delete if self.service_name == "AML"
-        su_unapproved_record.delete if self.service_name == "SALARY"
-        ic_unapproved_record.delete if self.service_name == "INSTANTCREDIT"
-        ft_unapproved_record.delete if self.service_name == "FUNDSTRANSFER"
-        pc_unapproved_record.delete if self.service_name == "PPC"
-        cn_unapproved_record.delete if self.service_name == "CNB"
-      end
-    end
-
-    def on_update_remove_unapproved_records
-      if approval_status == 'A' and approval_status_was == 'U'
-        ecol_unapproved_record.delete if self.service_name == "ECOL"
-        imt_unapproved_record.delete if self.service_name == "IMTSERVICE"
-        inw_unapproved_record.delete if self.service_name == "AML"
-        su_unapproved_record.delete if self.service_name == "SALARY"
-        ic_unapproved_record.delete if self.service_name == "INSTANTCREDIT"
-        ft_unapproved_record.delete if self.service_name == "FUNDSTRANSFER"
-        pc_unapproved_record.delete if self.service_name == "PPC"
-        cn_unapproved_record.delete if self.service_name == "CNB"
-      end
-    end 
   end
 end

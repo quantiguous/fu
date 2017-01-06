@@ -1,23 +1,20 @@
-.ticket_header_new
-  %h4
-    = "Upload Files"
+%h4
+  = "Upload Files"
 
-= simple_form_for @incoming_file, :html => {:class=>'form-horizontal', :autocomplete=>"off", :id => "upload_form"} do |f|
-  .form-main
-    .control-group
+= simple_form_for @incoming_file, :html => {:class=>'fu-form-horizontal', :autocomplete=>"off", :id => "upload_form"} do |f|
+  .fu-form-main
+    .fu-control-group
       = f.hidden_field :lock_version
-      = f.hidden_field :approved_id
-      = f.hidden_field :approved_version
       = f.hidden_field :service_name, :value => params[:sc_service]
-    .control-group
-      = f.label :file_type,nil,:class => 'control-label'
-      = f.select :file_type, Fu::IncomingFileType.where(:sc_service_id => @sc_service.try(:id), :auto_upload => 'Y').map {|u| [u.name, u.code]}, :include_blank => 'select'
-    .control-group
-      = f.label :file,nil,:class => 'control-label'
+    .fu-control-group
+      = f.label :file_type,nil,:class => 'fu-control-label'
+      = f.select :file_type, Fu::IncomingFileType.where(:sc_service_id => @sc_service.try(:id), :auto_upload => 'N').map {|u| [u.name, u.code]}, :include_blank => 'select'
+    .fu-control-group
+      = f.label :file,nil,:class => 'fu-control-label'
       = f.file_field :file
       / # = f.hidden_field :created_by, :value => current_user.id
       = f.hidden_field :status, :value => 'N'
       = hidden_field_tag :sc_service, params[:sc_service]
-  .form-actions
-    = f.button "submit", :class=>"btn btn-primary", :id => 'submit_file'
-    = link_to :Cancel,'/incoming_files?sc_service=' + params[:sc_service].to_s, :name => 'cancel', :class=>"cancel btn"
+  .fu-form-actions
+    = f.button "submit", :class=>"fu-btn fu-btn-primary", :id => 'submit_file'
+    = link_to :Cancel,'/fu/incoming_files?sc_service=' + params[:sc_service].to_s, :name => 'cancel', :class=>"cancel fu-btn"

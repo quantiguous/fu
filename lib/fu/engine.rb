@@ -3,6 +3,8 @@ require 'responders'
 require 'unscoped_associations'
 require 'haml-rails'
 require 'simple_form'
+require 'lazy_columns'
+require 'carrierwave'
 module Fu
   class Engine < ::Rails::Engine
     isolate_namespace Fu
