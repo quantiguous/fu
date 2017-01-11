@@ -46,7 +46,7 @@
               - link_text = record.incoming_file_record.fault_code
             = link_to link_text, fu.show_modal_incoming_file_record_path(record.incoming_file_record.id, :flag => 'fault'),  {:remote => true, 'data-toggle' =>  "modal", 'data-target' => '#modal-window'}
           %td{:style=>'text-align:left;'}
-            = link_to 'Show Fault Bitstream', fu.show_modal_bitstream_incoming_file_record_path(record.incoming_file_record.id), :flag => 'fault_bitstream'),  {:remote => true, 'data-toggle' =>  "modal", 'data-target' => '#modal-window'}
+            = link_to 'Show Fault Bitstream', fu.show_modal_incoming_file_record_path(record.incoming_file_record.id), :flag => 'fault_bitstream'),  {:remote => true, 'data-toggle' =>  "modal", 'data-target' => '#modal-window'}
   .form-actions{:style=>"text-align: center;"}
     = hidden_field_tag :file, params[:file_name]
     - if !@incoming_file.nil? and @incoming_file.try(:pending_approval) == 'Y'
