@@ -28,7 +28,7 @@
             .span{:class =>"has-tooltip", "data-toggle" => 'tooltip',"title" => "No Record Text Available for this record", "data-placement" => 'bottom', "data-html" => true}
               Show Record Text
           - else
-            = link_to "Show Record Text", "#", :class => 'show_record_text', :href => "#recordText", data: { record_txt: record.record_txt} 
+            = link_to "Show Record Text", show_modal_incoming_file_record_path(record.id,:flag => 'record'),  {:remote => true, 'data-toggle' =>  "modal", 'data-target' => '#modal-window'}
         %td{:style=>'width:25%; text-align:left;'}
           = record.status
         %td{:style=>'text-align:left;'}
@@ -36,46 +36,7 @@
             .span{:class =>"has-tooltip", "data-toggle" => 'tooltip',"title" => "No Fault Text Available for this record", "data-placement" => 'bottom', "data-html" => true}
               Show Fault Text
           - else
-            = link_to "Show Fault Text", "#", :class => 'show_fault_text', :href => "#faultText", data: { fault_reason: record.fault_reason, fault_code: record.fault_code} 
+            = link_to "Show Fault Text", show_modal_incoming_file_record_path(record.id,:flag => 'fault'),  {:remote => true, 'data-toggle' =>  "modal", 'data-target' => '#modal-window'}
         %td{:style=>'text-align:left;'}
-          = link_to "Show Fault Bitstream", "#", :class => 'show_fault_bitstream', :href => "#faultBitstream", data: { fault_bitstream: record.fault_bitstream}
-
-#recordText.modal.hide.fade{"aria-hidden" => "true", "aria-labelledby" => "myModalLabel", :role => "dialog", :tabindex => "-1"}
-  .modal-header
-    %button.close{"aria-hidden" => "true", "data-dismiss" => "modal", :type => "button"} ×
-    %h3 Record Text
-    #error_message{:style => 'color:red'}
-  .modal-body{:style => "max-height:450px;"}
-    .demo-area
-      %button#d_clip_button1.my_clip_button1{"data-clipboard-target" => "record_txt"}
-        %b Copy To Clipboard...
-    %pre#record_txt{:style => 'word-wrap: break-word'}
-      .reply{:style => 'word-wrap: break-word'}
-
-#faultText.modal.hide.fade{"aria-hidden" => "true", "aria-labelledby" => "myModalLabel", :role => "dialog", :tabindex => "-1"}
-  .modal-header
-    %button.close{"aria-hidden" => "true", "data-dismiss" => "modal", :type => "button"} ×
-    %h3 Fault Text
-    #error_message{:style => 'color:red'}
-  .modal-body{:style => "max-height:450px;"}
-    %table.table.no-border
-      %tr
-        %td.label Fault Code: 
-        %td
-          %label.fault_code{:style => 'word-wrap: break-word'}
-      %tr
-        %td.label Fault Reason:
-        %td
-          %label.fault_reason{:style => 'word-wrap: break-word'}
-
-#faultBitstream.modal.hide.fade{"aria-hidden" => "true", "aria-labelledby" => "myModalLabel", :role => "dialog", :tabindex => "-1"}
-  .modal-header
-    %button.close{"aria-hidden" => "true", "data-dismiss" => "modal", :type => "button"} ×
-    %h3 Fault Bitstream
-    #error_message{:style => 'color:red'}
-  .modal-body{:style => "max-height:450px;"}
-    .demo-area
-      %button#d_clip_button2.my_clip_button2{"data-clipboard-target" => "fault_bitstream"}
-        %b Copy To Clipboard...
-    %pre#fault_bitstream{:style => 'word-wrap: break-word'}
-      .reply{:style => 'word-wrap: break-word'}
+          = link_to "Show Fault Bitstream", show_modal_incoming_file_record_path(record.id,:flag => 'fault_bitstream'),  {:remote => true, 'data-toggle' =>  "modal", 'data-target' => '#modal-window'}
+%div{ id:"modal-window", class:"modal hide fade", role: "dialog", 'aria-labelledby' => "myModalLabel", 'aria-hidden' => "true"}

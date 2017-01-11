@@ -24,10 +24,10 @@ module Fu
     end
 
     def audit_steps
-      @file_record = Fu::IncomingFile.unscoped.find(params[:id])
-      file_record_values = find_logs(params, @file_record)
-      @file_record_values_count = file_record_values.count(:id)
-      @file_record_values = file_record_values.paginate(:per_page => 10, :page => params[:page]) rescue []
+      @file_record = Fu::IncomingFile.find(params[:id])
+      record_values = find_logs(params, @file_record)
+      @record_values_count = record_values.count(:id)
+      @record_values = record_values.paginate(:per_page => 10, :page => params[:page]) rescue []
     end
 
     def index
@@ -42,8 +42,17 @@ module Fu
     end
 
     def show_fault
-      file_record = Fu::IncomingFile.unscoped.find(params[:id])
+      file_record = Fu::IncomingFile.find(params[:id])
       @fault = file_record# report responds to fault
+      respond_to do |format|
+        format.js
+      end
+    end
+
+    def show_audit_modal
+      file_record = Fu::FmAuditStep.find(params[:id])
+      @flag = params[:flag]
+      @fault = file_record
       respond_to do |format|
         format.js
       end

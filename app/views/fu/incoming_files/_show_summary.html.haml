@@ -1,3 +1,4 @@
+- table = @incoming_file.incoming_file_type.records_table
 %br
 %br
 %h1 File Summary
@@ -101,12 +102,12 @@
         = "Audit Steps"
       %td{:style=>'text-align:left;'}
         = link_to 'Show', {:controller => 'incoming_files', :action => 'audit_steps', :id => @incoming_file.id, :step_name => 'ALL'}
-      - if !@incoming_file.incoming_file_type.records_table.nil? and has_route?({:controller => @incoming_file.incoming_file_type.records_table, :action => 'incoming_file_summary'})
+      - if !@incoming_file.incoming_file_type.records_table.nil? and has_route_in_main_app?({:controller => @incoming_file.incoming_file_type.records_table, :action => 'incoming_file_summary'})
         %tr
           %td{:style=>'text-align:left;'}
             = 'Other Details'
           %td{:style=>'text-align:left;'}
-            = link_to 'Show', {:controller => @incoming_file.incoming_file_type.records_table, :action => 'incoming_file_summary', :file_name => @incoming_file.file_name}
+            = link_to 'Show', main_app.public_send("#{table}_file_summary_path", :file_name => @incoming_file.file_name)
 
 %table.fu-table.table-bordered.table-striped.table-hover.align_center
   %thead
@@ -212,24 +213,23 @@
           = '-'
 
       - elsif !@incoming_file.incoming_file_type.records_table.to_s.empty?
-        - table = @incoming_file.incoming_file_type.records_table
-        - if has_route?({:controller => @incoming_file.incoming_file_type.records_table, :action => 'show'})
+        - if has_route_in_main_app?({:controller => @incoming_file.incoming_file_type.records_table, :action => 'show'})
           %td{:style=>'text-align:left;'}
             = @incoming_file.file_type
           %td{:style=>'text-align:center; border-left: 3px solid #ffffff;'}
             = @incoming_file.record_count || 0
           %td{:style=>'text-align:center;'}
-            = link_to @incoming_file.completed_record_count || 0, public_send("#{table}_path",:file_name => @incoming_file.file_name, :status => 'COMPLETED')
+            = link_to @incoming_file.completed_record_count || 0, main_app.public_send("#{table}_path",:file_name => @incoming_file.file_name, :status => 'COMPLETED')
           %td{:style=>'text-align:center;'}
             = link_to @incoming_file.bad_record_count || 0, incoming_file_records_path(:incoming_file_id => @incoming_file.id, :status => 'BAD')
           %td{:style=>'text-align:center; border-right: 3px solid #ffffff;'}
-            = link_to @incoming_file.failed_record_count || 0, public_send("#{table}_path",:file_name => @incoming_file.file_name, :status => 'FAILED')
+            = link_to @incoming_file.failed_record_count || 0, main_app.public_send("#{table}_path",:file_name => @incoming_file.file_name, :status => 'FAILED')
           %td{:style=>'text-align:center;'}
-            = link_to @incoming_file.timedout_record_count || 0, public_send("#{table}_path",:file_name => @incoming_file.file_name, :status => 'TIMED OUT')
+            = link_to @incoming_file.timedout_record_count || 0, main_app.public_send("#{table}_path",:file_name => @incoming_file.file_name, :status => 'TIMED OUT')
           %td{:style=>'text-align:center; border-left: 3px solid #ffffff;'}
-            = link_to @incoming_file.skipped_record_count || 0, public_send("#{table}_path",:file_name => @incoming_file.file_name, :status => 'SKIPPED')
+            = link_to @incoming_file.skipped_record_count || 0, main_app.public_send("#{table}_path",:file_name => @incoming_file.file_name, :status => 'SKIPPED')
           %td{:style=>'text-align:center;'}
-            = link_to @incoming_file.overriden_record_count || 0, public_send("#{table}_path",:file_name => @incoming_file.file_name, :status => 'OVERRIDEN', :overrided_flag => 'true')
+            = link_to @incoming_file.overriden_record_count || 0, main_app.public_send("#{table}_path",:file_name => @incoming_file.file_name, :status => 'OVERRIDEN', :overrided_flag => 'true')
           %td{:style=>'text-align:center; border-right: 3px solid #ffffff;'}
-            = link_to @incoming_file.pending_retry_record_count || 0, public_send("#{table}_path",:file_name => @incoming_file.file_name, :status => 'PENDING RETRY')
+            = link_to @incoming_file.pending_retry_record_count || 0, main_app.public_send("#{table}_path",:file_name => @incoming_file.file_name, :status => 'PENDING RETRY')
 %div{ id:"modal-window", class:"modal hide fade", role: "dialog", 'aria-labelledby' => "myModalLabel", 'aria-hidden' => "true"}

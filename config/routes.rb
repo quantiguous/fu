@@ -9,6 +9,7 @@ Fu::Engine.routes.draw do
       get :process_file
       get :reset
       get :show_fault
+      get :show_audit_modal
     end
   end
 
@@ -18,5 +19,9 @@ Fu::Engine.routes.draw do
   get '/view_raw_content/:id' => "incoming_files#view_raw_content"
   get 'incoming_file_records/:id/audit_steps/:step_name' => 'incoming_file_records#audit_steps'
   
-  resources :incoming_file_records
+  resources :incoming_file_records do
+    member do
+      get :show_modal
+    end
+  end
 end

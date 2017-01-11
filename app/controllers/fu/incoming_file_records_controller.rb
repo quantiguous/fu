@@ -6,16 +6,18 @@ module Fu
     respond_to :json, :html
 
     def index
-      records = IncomingFileRecord.where("incoming_file_id =? and status =?",params[:incoming_file_id],params[:status]).order("id desc")
+      records = Fu::IncomingFileRecord.where("incoming_file_id =? and status =?",params[:incoming_file_id],params[:status]).order("id desc")
       @records_count = records.count(:id)
       @records = records.paginate(:per_page => 10, :page => params[:page]) rescue []
     end
 
-    def audit_steps
-      @record = IncomingFileRecord.find(params[:id])
-      record_values = find_logs(params, @record)
-      @record_values_count = record_values.count(:id)
-      @record_values = record_values.paginate(:per_page => 10, :page => params[:page]) rescue []
+    def show_modal
+      file_record = Fu::IncomingFileRecord.unscoped.find(params[:id])
+      @flag = params[:flag]
+      @fault = file_record# report responds to fault
+      respond_to do |format|
+        format.js
+      end    
     end
   end
 end

@@ -1,7 +1,7 @@
 module Fu
   module ApplicationHelper
-    def has_route? options
-      Rails.application.routes.routes.map{|route| route.defaults}.include?(options)
+    def has_route_in_main_app? options
+      main_app.routes.routes.map{|route| route.defaults}.include?(options)
     end
 
     def raw_file_content(file_content_str)

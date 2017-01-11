@@ -12,7 +12,7 @@
     .fu-control-group
       = f.label :file,nil,:class => 'fu-control-label'
       = f.file_field :file
-      / # = f.hidden_field :created_by, :value => current_user.id
+      = f.hidden_field :created_by, :value => current_user.try(:id)
       = f.hidden_field :status, :value => 'N'
       = hidden_field_tag :sc_service, params[:sc_service]
   .fu-form-actions

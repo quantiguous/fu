@@ -27,5 +27,9 @@ module Fu
         record.fm_audit_steps.order("id desc") rescue []
       end      
     end
+
+    def can_select?(record)
+      !record.incoming_file_record.fault_code.nil?
+    end
   end
 end
