@@ -1,3 +1,50 @@
 = Fu
 
+Steps to include the engine in the app: 
+  1. Add the gem to the gemfile :
+      gem 'fu', :github => 'quantiguous/fu'
+  2. Add the js in application.js
+      //= require fu/fu.js
+  3. Add the css in application.sass
+      *= require fu/fu.css
+  4. Add the engine route in the application
+      mount Fu::Engine, at: '/fu'
+  5. Add the following env's in the application
+      CONFIG_FILE_UPLOAD_PATH = "<value>"
+      CONFIG_SCP_IIB_FILE_MGR = "<value>"
+      CONFIG_URL_IIB_FILE_MGR = "<value>"
+  6. Generate the migrations for the module
+      bundle exec rails generate fu:migrations <module>
+  7. Generate the models for the module
+      bundle exec rails generate fu:models <module>
+  8. Generate the controllers for the module
+      bundle exec rails generate fu:controllers <module>
+  9. Generate the views for the module
+      bundle exec rails generate fu:views <module>
+  10. The following routes should be added in routes.rb
+      resources :<module>_incoming_records
+      get '<module>_incoming_records_file_summary' => '<module>_incoming_records#incoming_file_summary'
+
+Example for a module:
+
+  The following models are in the engine:
+  
+  1. sc_services - 'Contains entries for service modules'
+  2. incoming_file_types - 'file types for the service modules'
+  3. incoming_files - 'the uploaded files'
+  4. incoming_file_records - 'details for the records created after upload'
+  5. fm_audit_logs - 'the audit details for the job after upload'
+
+  For each module, the following models are generated:
+  Eg: if the module name is 'cl'
+  
+  1. cl_incoming_records - contains the records created after the upload
+  2. cl_incoming_files - contains some details related to the module for the file
+
+  the index page can be accessed as follows:
+
+  fu/incoming_files?sc_service=CL
+
+  where 'CL' is the code for the module in sc_services table
+
 This project rocks and uses MIT-LICENSE.
