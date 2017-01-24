@@ -1,5 +1,3 @@
-= can_skip
-= file_can_skip
 - if (status == "FAILED") && (can_override == true || can_skip == true || can_retry == true)
   = file_can_retry
   - if file_can_override == 'Y'

@@ -25,10 +25,12 @@ Gem::Specification.new do |s|
   s.add_dependency 'unscoped_associations'
   s.add_dependency 'simple_form'
   s.add_dependency 'lazy_columns'
+  s.add_dependency 'pundit'
+  s.add_dependency 'faraday'
 
   s.add_development_dependency 'sqlite3'
   s.add_development_dependency 'rspec-rails', '3.5.0'
-  s.add_development_dependency 'factory_girl_rails'
+  s.add_development_dependency 'factory_girl', '4.5.0'
   s.add_development_dependency 'shoulda-matchers'
   s.add_development_dependency 'database_cleaner'
   s.add_development_dependency 'dotenv-rails'

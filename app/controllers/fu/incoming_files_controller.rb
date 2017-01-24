@@ -8,6 +8,7 @@ module Fu
 
     def new
       @incoming_file = Fu::IncomingFile.new
+      authorize @incoming_file
       @sc_service = Fu::ScService.find_by_code(params[:sc_service])
     end
 
@@ -89,6 +90,7 @@ module Fu
 
     def destroy
       @incoming_file = IncomingFile.unscoped.find_by_id(params[:id])
+      authorize @incoming_file
       if @incoming_file.status == "N"
         if @incoming_file.destroy
           FileUtils.rm_f @incoming_file.file.path
@@ -101,6 +103,7 @@ module Fu
 
     def approve
       @incoming_file = IncomingFile.unscoped.find(params[:id]) rescue nil 
+      authorize @incoming_file
       IncomingFile.transaction do
         approval = @incoming_file.approve
         if @incoming_file.save and approval.empty?
@@ -140,18 +143,21 @@ module Fu
     end
 
     def override_records
+      authorize IncomingFile
       uri = "/fm/incoming_files/override"
       call_api(params, uri)
       redirect_to :back
     end
 
     def skip_records
+      authorize IncomingFile
       uri = "/fm/incoming_files/skip_failed_records"
       call_api(params, uri)
       redirect_to :back
     end
 
     def approve_restart
+      authorize IncomingFile
       uri = "/fm/incoming_files/retry_failed_records"
       call_api(params, uri)
       redirect_to :back
@@ -159,6 +165,7 @@ module Fu
 
     def reject
       @incoming_file = IncomingFile.find(params[:id]) 
+      authorize @incoming_file
       uri = "/fm/incoming_files/reject"
       api_faraday_call(:put, uri, @incoming_file.file_name, nil)  
       redirect_to @incoming_file
@@ -166,12 +173,14 @@ module Fu
 
     def process_file
       @incoming_file = IncomingFile.find(params[:id]) 
+      authorize @incoming_file
       uri = "/fm/incoming_files/retry_file"
       api_faraday_call(:put, uri, @incoming_file.file_name, nil)
       redirect_to @incoming_file
     end
 
     def reset
+      authorize IncomingFile
       uri = "/fm/incoming_files/reset_records"
       call_api(params, uri)
       redirect_to :back
@@ -179,6 +188,7 @@ module Fu
 
     def generate_response_file
       @incoming_file = IncomingFile.find(params[:id]) 
+      authorize @incoming_file
       uri = "/fm/incoming_files/enqueue_response_file"
       api_faraday_call(:put, uri, @incoming_file.file_name, nil)
       redirect_to @incoming_file

@@ -5,6 +5,8 @@ require 'haml-rails'
 require 'simple_form'
 require 'lazy_columns'
 require 'carrierwave'
+require 'pundit'
+require 'faraday'
 module Fu
   class Engine < ::Rails::Engine
     isolate_namespace Fu

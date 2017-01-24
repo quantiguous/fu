@@ -50,10 +50,10 @@
   .form-actions{:style=>"text-align: center;"}
     = hidden_field_tag :file, params[:file_name]
     - if !@incoming_file.nil? and @incoming_file.try(:pending_approval) == 'Y'
-      - can_override = (can? :override_records, IncomingFile)
-      - can_skip = (can? :skip_records, IncomingFile)
-      - can_retry = (can? :approve_restart, IncomingFile)
-      - can_reset = (can? :reset, IncomingFile)
+      - can_override = Fu::IncomingFilePolicy.new(current_user, @incoming_file).override_records?
+      - can_skip = Fu::IncomingFilePolicy.new(current_user, @incoming_file).skip_records?
+      - can_retry = Fu::IncomingFilePolicy.new(current_user, @incoming_file).approve_restart?
+      - can_reset = Fu::IncomingFilePolicy.new(current_user, @incoming_file).reset?
       = render :partial => "incoming_records/api_buttons", :locals => {:status => params[:status], :can_override => can_override, :can_skip => can_skip, :can_retry => can_retry, :can_reset => can_reset, :file_can_override => @incoming_file.incoming_file_type.try(:can_override), :file_can_skip => @incoming_file.incoming_file_type.try(:can_skip), :file_can_retry => @incoming_file.incoming_file_type.try(:can_retry)}
 
 %div{ id:"modal-window", class:"modal hide fade", role: "dialog", 'aria-labelledby' => "myModalLabel", 'aria-hidden' => "true"}
